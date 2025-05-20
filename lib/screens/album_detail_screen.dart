@@ -69,7 +69,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               AspectRatio(
                 aspectRatio: 1,
                 child: CachedNetworkImage(
-                  imageUrl: photo.thumbnailUrl,
+                  imageUrl: 'https://source.unsplash.com/random/300x300?sig=24index',
                   fit: BoxFit.cover,
                   placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),
