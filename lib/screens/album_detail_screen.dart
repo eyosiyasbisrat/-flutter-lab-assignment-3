@@ -6,16 +6,27 @@ import '../blocs/album/album_event.dart';
 import '../blocs/album/album_state.dart';
 import '../models/album.dart';
 
-class AlbumDetailScreen extends StatelessWidget {
+class AlbumDetailScreen extends StatefulWidget {
   final Album album;
 
   const AlbumDetailScreen({Key? key, required this.album}) : super(key: key);
 
   @override
+  State<AlbumDetailScreen> createState() => _AlbumDetailScreenState();
+}
+
+class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AlbumBloc>().add(LoadAlbumPhotos(widget.album.id));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(album.title),
+        title: Text(widget.album.title),
       ),
       body: BlocBuilder<AlbumBloc, AlbumState>(
         builder: (context, state) {
@@ -31,7 +42,7 @@ class AlbumDetailScreen extends StatelessWidget {
                   Text(state.message),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<AlbumBloc>().add(LoadAlbumPhotos(album.id));
+                      context.read<AlbumBloc>().add(LoadAlbumPhotos(widget.album.id));
                     },
                     child: const Text('Retry'),
                   ),
@@ -46,38 +57,50 @@ class AlbumDetailScreen extends StatelessWidget {
   }
 
   Widget _buildPhotoGrid(List<dynamic> photos) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
+    return ListView.builder(
       itemCount: photos.length,
       itemBuilder: (context, index) {
         final photo = photos[index];
         return Card(
+          margin: const EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
+              AspectRatio(
+                aspectRatio: 1,
                 child: CachedNetworkImage(
                   imageUrl: photo.thumbnailUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),
                   ),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  errorWidget: (context, url, error) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, size: 48),
+                      const SizedBox(height: 8),
+                      Text('Error loading image: $error'),
+                      const SizedBox(height: 8),
+                      Text('URL: $url', style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  photo.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      photo.title,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Thumbnail URL: ${photo.thumbnailUrl}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
               ),
             ],
