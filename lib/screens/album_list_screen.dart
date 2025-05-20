@@ -51,7 +51,6 @@ class AlbumListScreen extends StatelessWidget {
         return ListTile(
           title: Text(album.title),
           onTap: () {
-            context.read<AlbumBloc>().add(LoadAlbumPhotos(album.id));
             GoRouter.of(context).push('/album-detail', extra: album);
           },
         );
