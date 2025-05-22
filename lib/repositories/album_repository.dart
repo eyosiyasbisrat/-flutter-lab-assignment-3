@@ -11,7 +11,7 @@ class AlbumRepository {
       final response = await http.get(Uri.parse('$baseUrl/albums'));
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
-        return jsonList.take(15).asMap().entries.map((entry) {
+        return jsonList.take(15).toList().asMap().entries.map((entry) {
           final index = entry.key + 1;
           final json = entry.value;
           return Album(
