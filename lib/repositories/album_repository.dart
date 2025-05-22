@@ -11,7 +11,15 @@ class AlbumRepository {
       final response = await http.get(Uri.parse('$baseUrl/albums'));
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
-        return jsonList.map((json) => Album.fromJson(json)).toList();
+        return jsonList.asMap().entries.map((entry) {
+          final index = entry.key + 1;
+          final json = entry.value;
+          return Album(
+            id: json['id'],
+            userId: json['userId'],
+            title: 'Album $index',
+          );
+        }).toList();
       } else {
         throw Exception('Failed to load albums');
       }
