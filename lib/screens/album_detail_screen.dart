@@ -5,6 +5,7 @@ import '../blocs/album/album_bloc.dart';
 import '../blocs/album/album_event.dart';
 import '../blocs/album/album_state.dart';
 import '../models/album.dart';
+import 'package:go_router/go_router.dart';
 
 class AlbumDetailScreen extends StatefulWidget {
   final Album album;
@@ -24,34 +25,47 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.album.title),
-      ),
-      body: BlocBuilder<AlbumBloc, AlbumState>(
-        builder: (context, state) {
-          if (state is AlbumPhotosLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is AlbumPhotosLoaded) {
-            return _buildPhotoGrid(state.photos);
-          } else if (state is AlbumPhotosError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AlbumBloc>().add(LoadAlbumPhotos(widget.album.id));
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+    return WillPopScope(
+      onWillPop: () async {
+        context.read<AlbumBloc>().add(LoadAlbums());
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.album.title),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              context.read<AlbumBloc>().add(LoadAlbums());
+              GoRouter.of(context).pop();
+            },
+          ),
+        ),
+        body: BlocBuilder<AlbumBloc, AlbumState>(
+          builder: (context, state) {
+            if (state is AlbumPhotosLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is AlbumPhotosLoaded) {
+              return _buildPhotoGrid(state.photos);
+            } else if (state is AlbumPhotosError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(state.message),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<AlbumBloc>().add(LoadAlbumPhotos(widget.album.id));
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -69,7 +83,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               AspectRatio(
                 aspectRatio: 1,
                 child: CachedNetworkImage(
-                  imageUrl: 'https://source.unsplash.com/random/300x300?sig=4index',
+                  imageUrl: 'https://source.unsplash.com/random/300x300?sig=4index',
                   fit: BoxFit.cover,
                   placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),
