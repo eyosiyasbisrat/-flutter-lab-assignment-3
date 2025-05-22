@@ -6,11 +6,30 @@ import '../blocs/album/album_state.dart';
 import '../models/album.dart';
 import 'package:go_router/go_router.dart';
 
-class AlbumListScreen extends StatelessWidget {
+class AlbumListScreen extends StatefulWidget {
   const AlbumListScreen({Key? key}) : super(key: key);
 
   @override
+  State<AlbumListScreen> createState() => _AlbumListScreenState();
+}
+
+class _AlbumListScreenState extends State<AlbumListScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAlbums();
+  }
+
+  void _loadAlbums() {
+    context.read<AlbumBloc>().add(LoadAlbums());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Albums'),
@@ -28,9 +47,7 @@ class AlbumListScreen extends StatelessWidget {
                 children: [
                   Text(state.message),
                   ElevatedButton(
-                    onPressed: () {
-                      context.read<AlbumBloc>().add(LoadAlbums());
-                    },
+                    onPressed: _loadAlbums,
                     child: const Text('Retry'),
                   ),
                 ],
